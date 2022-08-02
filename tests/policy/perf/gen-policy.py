@@ -40,21 +40,21 @@ def genIpBlocks():
     ipBlocks = ""
     for i in range(numCidrs):
         prefix = (i + 0x100) << 16
-    	cidr = random.randint(prefix, prefix | 0xffff)
-    	maskLen = random.randint(16, 24)
-    	cidr = maskIpAddr(cidr, maskLen) 
-    	ipBlock = "    - ipBlock:\n        cidr:%s\n        except:\n" % ipAddrToStr(cidr, maskLen)
-    	for j in range(numExcepts):
-    		exceptSubnet = random.randint(cidr, cidr | ((1 << (32 - maskLen)) - 1))
-    		excMaskLen = random.randint(24, 32)
-                exceptSubnet = maskIpAddr(exceptSubnet, excMaskLen)
-                ipBlock += "        - %s\n" % ipAddrToStr(exceptSubnet, excMaskLen)
-    	ipBlocks += ipBlock
+        cidr = random.randint(prefix, prefix | 0xffff)
+        maskLen = random.randint(16, 24)
+        cidr = maskIpAddr(cidr, maskLen)
+        ipBlock = "    - ipBlock:\n        cidr:%s\n        except:\n" % ipAddrToStr(cidr, maskLen)
+        for _ in range(numExcepts):
+            exceptSubnet = random.randint(cidr, cidr | ((1 << (32 - maskLen)) - 1))
+            excMaskLen = random.randint(24, 32)
+        exceptSubnet = maskIpAddr(exceptSubnet, excMaskLen)
+        ipBlock += "        - %s\n" % ipAddrToStr(exceptSubnet, excMaskLen)
+        ipBlocks += ipBlock
     return ipBlocks
 
 def genPorts():
     ports = "    ports:\n"
-    for i in range(numPorts):
+    for _ in range(numPorts):
         protocol = random.randint(0, 1)
         protocolStr = "TCP"
         if protocol == 1:

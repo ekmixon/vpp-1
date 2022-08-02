@@ -12,9 +12,7 @@ def _general_parser(stdout):
     kws = lines[0].split()
     for line in lines[1:]:
         parsed_line = line.split()
-        item = {}
-        for i in range(len(kws)):
-            item[kws[i]] = parsed_line[i]
+        item = {kws[i]: parsed_line[i] for i in range(len(kws))}
         name = item.pop('NAME')
         result[name] = item
     return result
@@ -28,10 +26,8 @@ def parse_kubectl_get_pods(stdout):
     kws = lines[0].split()
     for line in lines[1:]:
         parsed_line = line.split()
-        item = {}
-        for i in range(len(kws)):
-            item[kws[i]] = parsed_line[i]
-        print item, kws
+        item = {kws[i]: parsed_line[i] for i in range(len(kws))}
+        parsed_line = line.split()
         name = item.pop('NAME')
         result[name] = item
     return result
@@ -39,13 +35,15 @@ def parse_kubectl_get_pods(stdout):
 def parse_kubectl_get_pods_and_get_pod_name(stdout, pod_prefix):
     """Get list of pod names with given prefix"""
     pods = parse_kubectl_get_pods(stdout)
-    print pods
-    pod = [pod_name for pod_name, pod_value in pods.iteritems() if pod_prefix in pod_name]
-    return pod
+    pods = parse_kubectl_get_pods(stdout)
+    return [
+        pod_name
+        for pod_name, pod_value in pods.iteritems()
+        if pod_prefix in pod_name
+    ]
 
 def parse_kubectl_get_nodes(stdout):
-    nodes_details = _general_parser(stdout)
-    return nodes_details
+    return _general_parser(stdout)
 
 def parse_kubectl_describe_pod(stdout):
     """Parse kubectl describe pod output"""
@@ -54,7 +52,7 @@ def parse_kubectl_describe_pod(stdout):
     info = ["IP", "Name", "Status"]
     for line in lines:
         for item in info:
-            if line.startswith("{}: ".format(item)):
+            if line.startswith(f"{item}: "):
                 result[item] = line.split(": ")[-1].strip()
     name = result.pop("Name")
     return {name: result}
@@ -74,10 +72,7 @@ def get_join_from_kubeadm_init(stdout):
     Returns the join command,
     """
     lines = stdout.splitlines()
-    join_cmd = []
-    for line in lines:
-        if "kubeadm join --token" in line:
-            join_cmd.append(line)
+    join_cmd = [line for line in lines if "kubeadm join --token" in line]
     if len(join_cmd)  != 1:
-        raise Exception("Not expected result: {}".format(join_cmd) )
+        raise Exception(f"Not expected result: {join_cmd}")
     return join_cmd[0]
